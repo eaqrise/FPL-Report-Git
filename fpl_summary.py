@@ -102,17 +102,33 @@ def generate_league_summary(league_id, league_name):
         })
     
     teams_by_net = sorted(teams, key=lambda x: x['net_points'], reverse=True)
+    teams_by_gross = sorted(teams, key=lambda x: x['gross_points'], reverse=True)
     
     if not teams:
         return "No data available."
         
     gw = teams[0]['gw']
     
-    # Text format adjusted slightly for LINE readability (less markdown, more plain text)
     summary = f"\n🏆 สรุปผลลีก {league_name} (GW {gw})\n\n"
-    summary += "--- อันดับรายสัปดาห์ (GW Points) ---\n"
-    for i, t in enumerate(teams_by_net, 1):
-        summary += f"{i}. {t['name']} \n   -> {t['net_points']} แต้ม (ดิบ {t['gross_points']} | หัก -{t['transfer_cost']})\n"
+    
+    # Check if anyone took a hit
+    anyone_took_hit = any(t['transfer_cost'] > 0 for t in teams)
+    
+    if anyone_took_hit:
+        summary += "--- อันดับรายสัปดาห์ (คะแนนดิบ ไม่หักลบ) ---\n"
+        for i, t in enumerate(teams_by_gross, 1):
+            summary += f"{i}. {t['name']} = {t['gross_points']} แต้ม\n"
+            
+        summary += "\n--- อันดับรายสัปดาห์ (คะแนนสุทธิ หักลบแล้ว) ---\n"
+        for i, t in enumerate(teams_by_net, 1):
+            if t['transfer_cost'] > 0:
+                summary += f"{i}. {t['name']} = {t['net_points']} แต้ม (หัก -{t['transfer_cost']})\n"
+            else:
+                summary += f"{i}. {t['name']} = {t['net_points']} แต้ม\n"
+    else:
+        summary += "--- อันดับรายสัปดาห์ (GW Points) ---\n"
+        for i, t in enumerate(teams_by_net, 1):
+            summary += f"{i}. {t['name']} = {t['net_points']} แต้ม\n"
     
     summary += "\n--- อันดับคะแนนรวม (Overall) ---\n"
     for t in teams:
