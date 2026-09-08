@@ -145,18 +145,19 @@ def main():
         print(f"Gameweek {gw_id} already reported. Waiting for next Gameweek.")
         return
         
-    final_report_text = f"📊 สรุปผล FPL ประจำสัปดาห์ (สิ้นสุด GW {gw_id} เป็นทางการแล้ว!)\n"
+    # Send introductory message (optional, but good for context)
+    header_msg = f"📊 สรุปผล FPL ประจำสัปดาห์ (สิ้นสุด GW {gw_id} เป็นทางการแล้ว!)"
+    print(header_msg)
+    send_telegram_notify(header_msg)
     
     for league in LEAGUES:
         try:
             summary = generate_league_summary(league['id'], league['name'])
-            final_report_text += summary + "\n"
+            print(summary)
+            # Send each league as a separate Telegram message
+            send_telegram_notify(summary)
         except Exception as e:
             print(f"Error fetching data for {league['name']}: {e}\n")
-            
-    # Send to Telegram
-    print(final_report_text) # Print to console
-    send_telegram_notify(final_report_text)
             
     # Update state file
     with open(STATE_FILE, 'w') as f:
