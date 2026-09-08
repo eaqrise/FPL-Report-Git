@@ -210,7 +210,7 @@ def generate_league_summary(league_id, league_name):
                         losers_list = []
                         for t in teams:
                             if t['entry_id'] in gw_debt:
-                                losers_list.append(f"{t['name']}(เสีย {gw_debt[t['entry_id']]})")
+                                losers_list.append(f"{t['name']}(-{gw_debt[t['entry_id']]})")
                         orca_weekly_losers_str = ", ".join(losers_list)
     
     teams_by_net = sorted(teams, key=lambda x: x['net_points'], reverse=True)
@@ -224,8 +224,8 @@ def generate_league_summary(league_id, league_name):
     summary = f"\n🏆 สรุปผลลีก {league_name} (GW {gw})\n\n"
     
     if league_id == 294735:
-        summary += f"🌟 แชมป์สัปดาห์นี้: {orca_weekly_winners_str}\n"
-        summary += f"💸 คนเสียตังค์สัปดาห์นี้: {orca_weekly_losers_str}\n\n"
+        summary += f"🌟 แชมป์: {orca_weekly_winners_str}\n"
+        summary += f"💸 ตกชั้น: {orca_weekly_losers_str}\n\n"
     
     anyone_took_hit = any(t['transfer_cost'] > 0 for t in teams)
     
@@ -256,12 +256,12 @@ def generate_league_summary(league_id, league_name):
             summary += f"💀 {t['name']} = แพ้ {t['losses']} ครั้ง\n"
             
     if league_id == 294735:
-        summary += "\n--- 📊 สถิติสะสม (Win/Loss & ยอดเสียเงิน) ---\n"
+        summary += "\n--- 📊 Win/Loss สะสม ---\n"
         teams_by_stats = sorted(teams, key=lambda x: (x['orca_debt'], -x['orca_wins']), reverse=True)
         for t in teams_by_stats:
             if t['orca_wins'] > 0 or t['orca_losses'] > 0:
                 icon = "💀" if t['orca_debt'] > 0 else "👑"
-                debt_str = f" | ยอดสะสม -{t['orca_debt']} บาท" if t['orca_debt'] > 0 else ""
+                debt_str = f" (-{t['orca_debt']})" if t['orca_debt'] > 0 else ""
                 summary += f"{icon} {t['name']} = Win {t['orca_wins']} Loss {t['orca_losses']}{debt_str}\n"
             
     return summary
