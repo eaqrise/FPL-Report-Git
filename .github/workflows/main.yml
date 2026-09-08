@@ -1,0 +1,35 @@
+                                                                                                      
+    name: FPL Weekly Summary                                                                          
+                                                                                                      
+    on:                                                                                               
+      schedule:                                                                                       
+        # รันทุกๆ 2 ชั่วโมง เพื่อเช็คว่า FPL สรุปคะแนนหรือยัง                                                    
+        - cron: "0 */2 * * *"                                                                         
+      workflow_dispatch:                                                                              
+                                                                                                      
+    jobs:                                                                                             
+      run-fpl-summary:                                                                                
+        runs-on: ubuntu-latest                                                                        
+        permissions:                                                                                  
+          contents: write                                                                             
+                                                                                                      
+        steps:                                                                                        
+          - name: Checkout repository                                                                 
+            uses: actions/checkout@v4                                                                 
+                                                                                                      
+          - name: Setup Python                                                                        
+            uses: actions/setup-python@v5                                                             
+            with:                                                                                     
+              python-version: '3.10'
+              
+          - name: Run FPL Summary Script
+            env:
+              TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+              TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+            run: python fpl_summary.py
+            
+          - name: Commit state file (last_reported_gw.txt)
+            uses: stefanzweifel/git-auto-commit-action@v5
+            with:
+              commit_message: "Auto-update last reported GW state"
+              file_pattern: "last_reported_gw.txt"
